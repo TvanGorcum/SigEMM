@@ -15,79 +15,50 @@ from regression import (
     _augment_with_kept,)
 from evaluation import evaluate_linear_model, get_rows_subgroup, ensure_dict
 
-
-TARGETS = [
-    'G1',
-    'G2',
-    'absences',
-    'activities',
-    'paid',
-    'famsup',
-    'schoolsup',
-    'studytime'
-]
-
-DESCRIPTORS = [ 
-    'school',
-    'sex',
-    'age',
-    'address',
-    'famsize',
-    'Pstatus',
-    'Medu',
-    'Fedu',
-    'Mjob',
-    'Fjob',
-    'reason',
-    'guardian',
-    'traveltime',
-    'failures',
-    'nursery',
-    'higher',
-    'internet',
-    'romantic',
-    'famrel',
-    'freetime',
-    'goout',
-    'Dalc',
-    'Walc',
-    'health'
- ]
-
-
-# Define which columns are numeric #None here bc all are in bins
+# Define which columns are numeric
 NUMERIC_COLS = [
-    'age',
-    'Medu',
-    'Fedu',
-    'traveltime',
-    'studytime',
-    'failures',
-    'famrel',
-    'freetime',
-    'goout',
-    'Dalc',
-    'Walc',
-    'health',
-    'absences',
-    'G1',
-    'G2',
-    'G3'
+    "total_attended_labsessions",
+    "active_minutes",
+    "nr_distinct_files_viewed",
+    "total_course_activities",
+    "nightly_activities",
+    "distinct_days",
+    "logged_in_weekly",
+    "nr_files_viewed",
+    "nr_slides_viewed",
+    "nr_practice_exams_viewed",
+    #"bool_practice_exams_viewed"
 ]
 
+# Define attributes for subgroup discovery
 ATTR_CONFIG = {
-    key: 'numeric' if key in NUMERIC_COLS else 'categorical' for key in DESCRIPTORS
+    "sex": "categorical",
+    "croho": "categorical",
+    "ECTS": "categorical",
+    "GPA": "numeric",
+    "origin": "categorical",
+    "course_repeater": "categorical",
+    "type_vooropleiding" : "categorical",
+    "double_major": "categorical"
 }
-
-
-# Define target variable 
-Y_COL = "G3"
 
 # Define features used for regression
 X_COLS = [
-       x for x in TARGETS if x != Y_COL
+    "total_attended_labsessions",
+    "active_minutes",
+    "nr_distinct_files_viewed",
+    "total_course_activities",
+    #"nightly_activities",
+    "distinct_days",
+    #"logged_in_weekly",
+    "nr_files_viewed",
+    #"nr_slides_viewed",
+    "nr_practice_exams_viewed",
+    #"bool_practice_exams_viewed"
 ]
 
+# Define target variable 
+Y_COL = "CalculatedNumericResult"
 
 def approach_one(models, subgroups_train, subgroups_test, global_model, train_df, test_df, predictor_cols, target_col, results_rows, coefs_dict):
     #
@@ -281,32 +252,30 @@ def approach_one(models, subgroups_train, subgroups_test, global_model, train_df
             i += 1
     
     return coefs_dict
+          
 
 
-def main(course=None, test_size=0.3, min_size=15):
+def main(test_size=0.3, min_size=70):
     # Define target variable and set regression parameters
-    target_col = Y_COL
+    target_col = 'CalculatedNumericResult'
     predictor_cols = X_COLS
-    datafile = 'Data/SecondarySchool/'+str(course)+'_cleaned.csv'
+    datafile = 'data/FDA.csv'
     # Define size of the test set
     test_size = test_size
-
-    coefs_dict = {'subgroup': [], 'term': [], 'coef': [], 'p': [], 'significant': [] }
     
+    coefs_dict = {'subgroup': [], 'term': [], 'coef': [], 'p': [], 'significant': [] }
+
     # Load the data and split it into train/test
     # This assumes the data is cleaned and there are no NaNs. 
 
     df = pd.read_csv(datafile)
-    df[X_COLS] = df[X_COLS].astype(float)
-    df[Y_COL] = df[Y_COL].astype(float)
     df = df.copy()
     for c in NUMERIC_COLS:
         df[c] = pd.to_numeric(df[c], errors="coerce")
 
     # Drop rows with NaNs in numeric columns and specifically in GPA and ECTS
-    # No NaNs in the data
-    # df = df.dropna(subset=NUMERIC_COLS).reset_index(drop=True)
-    # df = df.dropna(subset=['GPA', 'ECTS',])
+    df = df.dropna(subset=NUMERIC_COLS).reset_index(drop=True)
+    df = df.dropna(subset=['GPA', 'ECTS',])
 
     train_df, test_df = train_test_split(df, test_size=test_size, random_state=4)
 
@@ -329,7 +298,8 @@ def main(course=None, test_size=0.3, min_size=15):
     #print(models)
     print(f"Collected {len(models)} subgroup models.")
     # Save to CSV (one row per subgroup-term)
-    save_models_csv(models, f"Results/subgroup_linear_{course}.csv")
+    save_models_csv(models, f"Results/subgroup_linear_fda.csv")
+    print(f"Exported {len(models)} subgroup models to Results/subgroup_linear_fda.csv")
 
     # Evaluation metrics for baseline model
     metrics_complex = evaluate_linear_model(model = global_model, df = test_df, X_cols= X_COLS , y_col= target_col)
@@ -375,11 +345,11 @@ def main(course=None, test_size=0.3, min_size=15):
 
     # Save all results of the fitted subgroups
     results_df = pd.DataFrame.from_records(results_rows)
-    results_df.to_csv(f"results/subgroup_results_{course}.csv", index=False)
+    results_df.to_csv(f"results/subgroup_results_fda.csv", index=False)
 
 
     coefs_df = pd.DataFrame.from_dict(coefs_dict)
-    coefs_df.to_csv(f"results/coefs_{course}.csv", index=False)
+    coefs_df.to_csv(f"results/coefs_fda.csv", index=False)
 
 
 if __name__ == "__main__":
