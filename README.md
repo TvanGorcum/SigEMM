@@ -6,7 +6,9 @@ This repository contains code supporting our Paper "Discovering Stratified Learn
 This code conducts Beam Search Subgroup Discovery on public and private datasets (containing student learning behaviour and performance) and detects false group discovered with the use of linear regression.
 
 ## Dataset 
-To conduct our tests we use both private and public datasets. The public dataset for mathematics and portuguese course is 10.24432/C5TG7T (DOI). The private datasets will be published in future upon acceptance of the paper
+To conduct our tests we use both private and public datasets. The public dataset for mathematics and portuguese course is 10.24432/C5TG7T (DOI). 
+We kindly ask you to request our approval for inclusion of any of the private datasets for research and publication purposes. If this dataset is used in research, please cite this paper:
+_paper currently under review - correct citation pending._
 
 ## File structure
 ```
