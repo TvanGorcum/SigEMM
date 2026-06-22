@@ -81,7 +81,7 @@ Open and execute one of the notebooks for each dataset:
 
 ## Authors 
 <ul>
-<li>Anonymous</li>
+<li>Dani Chambon, Hilde Storms, Teun van Gorcum, Neha Bogavarapu, Jan Ludwicki, Wouter Duivesteijn, and Lieke van den Biggelaar from the Technical University of Eindhoven </li>
 </ul>
 
 
